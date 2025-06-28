@@ -26,11 +26,9 @@ export async function POST(req: NextRequest) {
       { content: input, role: 'user' }
     ]
 
-    // const { apiUrl, apiKey, model } = getApiConfig()
     const model = process.env.OPENAI_MODEL || 'o4-mini'
     const stream = await getResponseStream(model, messagesWithHistory)
 
-    // const stream = await getOpenAIStream(apiUrl, apiKey, model, messagesWithHistory)
     return new NextResponse(stream, {
       headers: { 'Content-Type': 'text/event-stream' }
     })
@@ -46,7 +44,6 @@ export async function POST(req: NextRequest) {
 const getResponseStream = async (model: string, messages: Message[]) => {
   const encoder = new TextEncoder()
 
-  // ① system プロンプトは instructions、残り会話は 1 本の文字列として渡す
   const [{ content: instructions }, ...rest] = messages
   const userConversation = rest.map((m) => m.content).join('\n')
 
@@ -55,10 +52,6 @@ const getResponseStream = async (model: string, messages: Message[]) => {
     instructions,
     input: userConversation,
     stream: true,
-    temperature: 0.5,
-    top_p: 0.95,
-    // presence_penalty: 0,
-    // frequency_penalty: 0,
     tools: [{ type: 'web_search_preview' }]
   })
 
